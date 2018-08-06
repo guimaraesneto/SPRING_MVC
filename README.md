@@ -29,4 +29,7 @@ O Spring MVC fornece também a possibilidade de integração com diversos recurs
 
 Conhecer a estrutura do projeto é uma importante etapa para que você tenha uma visão geral do que será apresentado ao longo do curso. Além disso, facilita na compreensão dos recursos da tecnologia em análise, o Spring MVC, e como esses recursos são empregados para atender à demanda.
 
-![Alt text](https://arquivo.devmedia.com.br/naoexclusivo/EduardoSpinola/OqueeSpringMVC/images/fluxo_springmvc.png?raw=true "Figura 2. Fluxo de funcionamento do Spring MVC")
+![Alt text](https://github.com/guimaraesneto/SPRING_MVC/blob/master/img/estrutura.png?raw=true "Figura 1. Estrutura do projeto
+")
+
+**Figura 1. Estrutura do projeto**
