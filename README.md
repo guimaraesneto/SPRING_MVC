@@ -187,5 +187,265 @@ O controller WelcomeController tem as seguintes características:
 
 # 6. Criando o model
 
+A criação das classes de domínio é um importante e simples passo em grande parte dos projetos. Com o Spring MVC isso não muda. Criaremos agora a classe Usuario, que, como o nome indica, vai representar o modelo de dados de um usuário.
+
+**Conteúdo de apoio**
+
+Basicamente uma aplicação é construída em torno de uma ou mais classes de domínio, que é a representação de uma entidade de negócio. Por exemplo, para representar uma entidade de usuário, temos a classe Usuario, como descrita a seguir:
+
+```java
+public class Usuario {
+  
+  private Long id;   
+  private String nome;          
+  private String sobrenome;
+                 
+  public Usuario() {
+     super();
+  }              
+  
+   public Usuario(Long id, String nome, String sobrenome) {
+     super();
+     this.id = id;
+     this.nome = nome;
+     this.sobrenome = sobrenome;
+   }
+   // métodos getters/setters e toString()             
+}
+```
+
+Note que o código dessa classe é bastante simples. Ele é composto por alguns atributos, dois construtores, os getters e setters e o método toString().
+
+# 7. Apresentando o DAO
+
+Para simular o armazenamento de dados e assim poder focar nos recursos do Spring MVC, vamos criar um DAO, padrão de acesso a dados que, em nosso exemplo, vai abstrair o acesso a dados em memória. Esse DAO é constituído pela interface UsuarioDao, a qual será implementada pela classe concreta UsuarioDaoImpl.
+
+**Conteúdo de apoio**
+
+Uma forma rápida de simular uma base de dados em uma aplicação é utilizando uma lista estática para o armazenamento dos registros. Desta forma, é possível inicializar a lista com alguns dados e ainda incluir, remover ou alterar os registros durante a execução da aplicação. Um exemplo pode ser visto a seguir:
+
+```java
+private static List<Usuario> us;       
+                 
+private List<Usuario> createUserList() {
+   if (us == null) {
+     us = new LinkedList<>();
+     us.add(new Usuario(System.currentTimeMillis()+1L, "Ana", "da Silva"));
+     us.add(new Usuario(System.currentTimeMillis()+2L, "Luiz", "dos Santos"));
+     us.add(new Usuario(System.currentTimeMillis()+3L, "Mariana", "Mello"));
+     us.add(new Usuario(System.currentTimeMillis()+4L, "Caren", "Pereira"));
+     us.add(new Usuario(System.currentTimeMillis()+5L, "Sonia", "Fagundes"));
+     us.add(new Usuario(System.currentTimeMillis()+6L, "Norberto", "de Souza"));
+   }
+   return us;
+}
+```
+
+Para interagir com a lista e simular as operações de um CRUD, vamos utilizar os recursos do Java 8. Como exemplo, vejamos o código do método excluir(), apresentado a seguir:
+
+```java
+@Override
+public void excluir(Long id) {
+    us.removeIf((u) -> u.getId().equals(id));                   
+}
+```
+
+O método removeIf() recebe como parâmetro uma expressão lambda para localizar na lista o objeto Usuarioque deve ser removido. Esse usuário será encontrado a partir do atributo id. Em seguida, o objeto é excluído.
+
+# 8. Criando a tela de listagem
+
+A implementação da listagem de dados normalmente é a primeira funcionalidade a ser implementada de um CRUD. Você aprenderá aqui a desenvolver a página JSP responsável por exibir a lista de usuários cadastrados na aplicação. Essa lista será exibida em uma tabela com recursos de JSTL.
+
+09:32 min
+
+Conteúdo de apoio
+Para listar os dados armazenados em uma aplicação, comumente são usadas tabelas nas páginas web. Essas tabelas são baseadas em código HTML para definir suas estruturas como o cabeçalho (colunas) e o corpo (linhas). E para que os registros sejam exibidos na tabela, podemos usar o componente foreach da biblioteca JSTL, como apresentado a seguir:
+```html
+<table class="table table-striped table-condensed">
+   <thead>
+      <tr>
+         <th>ID</th>
+         <th>NOME</th>
+         <th>AÇÃO</th>
+      </tr>
+   </thead>
+   <tbody>
+      <c:forEach var="usuario" items="${usuarios }">
+         <tr>
+            <td>${usuario.id }</td>
+            <td>${usuario.nome } ${usuario.sobrenome }</td>
+            <td>                        
+               <a class="btn btn-info" href="#" >Editar</a>
+               <a class="btn btn-danger" href="#" >Excluir</a>
+            </td>
+         </tr>
+      </c:forEach>
+   </tbody>
+</table>
+```
+
+Entre as **Linhas 10 e 18** temos o processo que lista os usuários na tabela com auxílio da biblioteca JSTL:
+
+**Linha 10**: A taglib core da JSTL utiliza o recurso foreach para a listar os dados. Esse recurso tem duas propriedades: items, que contém o objeto enviado pelo controller com a lista de usuários; e a propriedade var, que é o nome da variável que vai armazenar o objeto usuario da posição atual no loop da lista;
+
+**Linha 12**: Imprime na tabela o id do usuário na posição atual do loop;
+
+**Linha 13**: Imprime na tabela o nome e sobrenome do usuário na posição atual do loop;
+
+**Linha 18**: Fechamento da tag do processo foreach.
+
+# 9. Listando os registros em uma tabela
+
+Aprenda como preparar um controller que vai enviar para uma página JSP um objeto contendo uma lista de registros, para que essa lista seja exibida na página de listagem dentro de uma tabela.
+
+**Conteúdo de apoio**
+
+No Spring MVC a classe que representa um controller possui algumas particularidades que são importantes para os componentes View e Controller se comunicar. Além disso, essa classe será gerenciada pelo Spring Framework, fazendo uso dos recursos de injeção de dependências. Veja a seguir um breve exemplo da classe UsuarioController.
+
+@Controller
+@RequestMapping("usuario")
+public class UsuarioController {
+   @Autowired
+   private UsuarioDao dao;
+
+   @RequestMapping(value = "/todos", method = RequestMethod.GET)
+   public ModelAndView listaTodos(ModelMap model) {
+      model.addAttribute("usuarios", dao.getTodos());
+      return new ModelAndView("/user/list", model);
+   }
+}
+
+Os principais pontos da classe UsuarioController são analisados a seguir:
+
+**Linha 01**: Anotação responsável por transformar a classe em um bean do tipo controller;
+
+**Linha 02**: Esta anotação mapeia o controller com o path usuario;
+
+**Linha 04**: Anotação para injeção da dependência UsuarioDao;
+
+**Linha 07**: Esta anotação vai definir o path para acesso ao método listaTodos() e também define este método como do tipo GET;
+
+**Linha 08**: O argumento ModelMap é utilizado para armazenar os dados que serão enviados à página JSP;
+
+**Linha 09**: O método addAttribute() recebe a variável que vai armazenar a lista de usuarios que será enviada para a página JSP;
+
+**Linha 10**: A instância de ModelViewController retorna um objeto contendo a página JSP a ser exibida ao usuário e o objeto model com os dados enviados para a página.
+
+# 10. Criando a tela de cadastro e edição
+
+ma tela presente em qualquer aplicação é a de cadastro/edição dos dados referentes às classes de domínio. Assim, você aprenderá agora a criar uma nova página JSP que vai conter o formulário para as ações de cadastro e atualização dos registros armazenados na aplicação. Este formulário vai ser desenvolvido com recursos nativos do Spring MVC.
+
+Conteúdo de apoio
+Para cadastrar ou alterar dados em uma aplicação web utilizamos um formulário HTML. No Spring MVC há um formulário próprio para esse tipo de ação e ele se difere do formulário HTML padrão devido alguns detalhes, como pode ser visto a seguir:
+
+<form:form modelAttribute="usuario" action="${save }" method="post">
+   <div class="form-group">
+      <label for="nome">Nome: </label>
+      <form:input path="nome" class="form-control"/>
+   </div>
+   <div class="form-group">
+      <label for="sobrenome">Sobrenome: </label>
+      <form:input path="sobrenome"  class="form-control"/>
+   </div>
+   <div class="form-group">
+      <button type="submit" class="btn btn-primary">Confirmar</button>
+   </div>
+</form:form>
+
+Neste formulário temos alguns recursos nativos do Spring MVC, que são:
+
+**Linha 01**: A tag <form:form> cria um formulário baseado em recursos do Spring, como é o caso do atributo modelAttribute, que realiza o bind entre objeto modelo (usuario), a view e o controller;
+
+**Linhas 04 e 08**: A tag <form:input> representa um componente do tipo input que automaticamente identifica e faz o bind entre o atributo adicionado no atributo path e o objeto de domínio declarado em modelAttribute.
+
+# 11. Cadastrando novos registros
+
+Para completar a tela de cadastro, é necessário adicionar ao respectivo controller o método que recebe os dados enviados de um formulário a partir do front-end da aplicação para realizar a operação de inserção via DAO.
+
+**Conteúdo de apoio**
+
+Quando trabalhamos com Servlet, sem o auxílio de um framework MVC como o Spring, os dados enviados pelo formulário chegam ao lado servidor da aplicação em um objeto do tipo Request. Assim, devemos capturar do objeto Request os valores do formulário para depois atribuí-los a um objeto de domínio. Já no Spring MVC esse trabalho é minimizado. Os dados enviados via formulário para o controller já chegam no back-end no formato de um objeto de domínio, como pode ser visto a seguir:
+
+@PostMapping("/save")
+   public String save(@ModelAttribute("usuario") Usuario usuario, RedirectAttributes attr) {
+      dao.salvar(usuario);
+      attr.addFlashAttribute("message", "Usuário salvo com sucesso.");
+      return "redirect:/usuario/todos";
+   }
+
+**Linha 01**: Esta anotação é exclusiva para operações via POST e deve conter como parâmetro o path referente à solicitação do lado cliente;
+
+**Linha 02**: Na declaração do método save passamos dois argumentos, com as seguintes funções:
+○ @ModelAttribute: Realiza o bind entre o objeto de domínio enviado pelo formulário e o objeto esperado no controller;
+○ RequestAttributes: Este objeto serve para atribuir valores em uma ação de redirect que parte do controller.
+
+**Linha 03**: O objeto dao salva o usuário recebido do formulário;
+
+**Linha 04**: Método para atribuir os valores que serão enviados via redirect;
+
+**Linha 05**: Realiza um redirecionamento para o path /usuario/todos.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
