@@ -120,16 +120,72 @@ Além das dependências apresentadas, vamos utilizar o Maven para gerenciar o se
 </build>
 ```
 
+# 4. Configurando o Spring MVC
+
+A configuração de frameworks é uma etapa que pode levantar muitas dúvidas. O Spring MVC, assim como os demais, requer algumas configurações. Conheça, então, os passos iniciais para a configuração básica do Spring MVC junto ao Spring Framework. Essa configuração será totalmente baseada em código Java e será dividida em três classes principais.
+
+**Conteúdo de apoio**
+
+Quando trabalhamos com o Spring MVC é necessário definir qual o tipo de recurso será usado nas páginas web (JSP, JSTL, Thymeleaf, etc.). Então, para informar o recurso escolhido devemos configurar um beancom essa informação. No caso, para uso de JSP com JSTL o bean a ser utilizado é o InternalResourceViewResolver, como descrito a seguir:
+
+```java
+@Bean
+public InternalResourceViewResolver viewResolver() {
+   InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+   resolver.setPrefix("/WEB-INF/views/");
+   resolver.setSuffix(".jsp");
+   resolver.setViewClass(JstlView.class);
+   return resolver;
+}
+```
+
+**Linha 01**: Define o método como um bean gerenciado pelo Spring Framework;
+
+**Linha 03**: A instância da classe InternalResourceViewResolver é necessária para a configuração do view template do Spring MVC baseado em JSTL;
+
+**Linha 04**: Configuração do prefixo da páginas JSPs. Assim, o Spring MVC sabe onde encontrar as páginas e não se faz necessário digitar esse caminho sempre que for necessário acessar uma dessas páginas;
+
+**Linha 05**: Define o tipo de arquivo das páginas web. Assim, não se faz necessário digitar a extensão do arquivo sempre que se quiser acessar um desses arquivos através dos controllers;
+
+**Linha 06**: A classe JstlView informa ao Spring MVC que o view template será baseado no framework JSTL.
+
+# 5. Meu primeiro Controller
+
+Para dar os primeiros passos no Spring MVC e verificar se o projeto está configurado corretamente, vamos aprender como criar uma classe do tipo controller. A partir disso, será possível adicionar uma página JSP à aplicação, página essa que será acessada através desse controller.
 
 
+**Conteúdo de apoio**
+
+Veja a seguir um exemplo básico de uma classe que representa um controller gerenciado pelo Spring MVC:
 
 
+```java
+ @Controller
+ public class WelcomeController {
 
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String welcome() {
+        return "welcome";
+    }
 
+     @RequestMapping(value = "/teste", method = RequestMethod.GET)
+     public ModelAndView teste() {
+         ModelAndView view = new ModelAndView("welcome");
+         view.addObject("teste", "Olá, eu sou o spring MVC.");
+         return view;
+      }
+}
+```
 
+O controller WelcomeController tem as seguintes características:
 
+**Linha 01**: Anotação responsável por informar ao Spring MVC que está é uma classe (bean) do tipo controller;
 
+**Linhas 04 e 09**: Esta anotação tem como função mapear o path de acesso, via URL, ao método. Outro objetivo é definir o verbo HTTP (POST, GET, ...) referente à solicitação;
 
+**Linha 11**: O objeto ModelAndView é usado como recurso do Spring MVC para enviar valores para as páginas através de variáveis.
+
+# 6. Criando o model
 
 
 
