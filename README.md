@@ -256,8 +256,6 @@ O método removeIf() recebe como parâmetro uma expressão lambda para localizar
 
 A implementação da listagem de dados normalmente é a primeira funcionalidade a ser implementada de um CRUD. Você aprenderá aqui a desenvolver a página JSP responsável por exibir a lista de usuários cadastrados na aplicação. Essa lista será exibida em uma tabela com recursos de JSTL.
 
-09:32 min
-
 Conteúdo de apoio
 Para listar os dados armazenados em uma aplicação, comumente são usadas tabelas nas páginas web. Essas tabelas são baseadas em código HTML para definir suas estruturas como o cabeçalho (colunas) e o corpo (linhas). E para que os registros sejam exibidos na tabela, podemos usar o componente foreach da biblioteca JSTL, como apresentado a seguir:
 ```html
@@ -525,7 +523,8 @@ O método addResourceHandlers() deve ser sobrescrito com informações sobre o l
 **Linha 04**: O método addResourceLocations() deve receber como parâmetro o local raiz de onde os arquivos estáticos estão localizados. Normalmente esse local é o diretório WEB-INF/resources.
 
 
-
+![Alt text](https://github.com/guimaraesneto/SPRING_MVC/blob/master/img/TelaDoProjeto.png?raw=true "Figura 2. Tela do sistema
+")
 
 
 
