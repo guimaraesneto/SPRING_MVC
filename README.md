@@ -385,24 +385,144 @@ Quando trabalhamos com Servlet, sem o auxílio de um framework MVC como o Spring
 
 **Linha 05**: Realiza um redirecionamento para o path /usuario/todos.
 
+# 12. Editando os registros
+
+Para a edição de registros, assim como para as demais ações na camada de visão, vamos criar um controller. Aprenda nesta aula como preparar um controller que vai receber uma solicitação para atualização de registros a partir de um formulário.
+
+**Conteúdo de apoio**
+
+Antes de realizar a edição de dados em um formulário no lado cliente, é necessário enviar ao formulário os dados que serão editados. Para isso, temos o seguinte método no controller:
+
+```java
+@GetMapping("/update/{id}")
+public ModelAndView preUpdate(@PathVariable("id") Long id, ModelMap model) {
+   Usuario usuario = dao.getId(id);
+   model.addAttribute("usuario", usuario);
+   return new ModelAndView("/user/add", model);
+}
+```
+
+**Linha 01**: Esta anotação mapeia uma solicitação enviada para o path /update/id;
+
+**Linha 02**: @PathVariable captura na URL da solicitação o valor correspondente a seu parâmetro, neste caso, o valor referente ao id enviado na solicitação;
+
+**Linha 03**: A partir do id recuperado na URL fazemos a consulta no dao pelo usuário que será editado;
+
+**Linha 04**: Adicionamos na resposta da solicitação o usuário retornado pelo dao;
+
+**Linha 05**: Como resposta à solicitação, a página do formulário será aberta com os dados do usuário que são entregues a ela pelo objeto model.
 
 
+# 13. Excluindo itens da listagem
 
+Aprenda agora a implementar um controller com Spring MVC para receber como solicitação o pedido de exclusão de um usuário cadastrado na base.
 
+**Conteúdo de apoio**
 
+Em uma classe do tipo controller há diversos métodos que recebem requisições do lado cliente da aplicação. Entre esses métodos, temos o responsável por receber o pedido de exclusão de um objeto de domínio, como pode ser visto a seguir:
 
+```java
+@GetMapping("/delete/{id}")
+public String delete(@PathVariable("id") Long id, RedirectAttributes attr) {
+   dao.excluir(id);
+   attr.addFlashAttribute("message", "Usuário excluído com sucesso.");
+   return "redirect:/usuario/todos";
+}
+```
 
+O método apresentado realiza a operação de exclusão de um registro via identificador recebido como parâmetro na URL da solicitação. Como resposta, realiza um redirecionamento, contendo uma mensagem de sucesso que vai ser exibida na página de resposta.
 
+# 14. Conversão de data entre view e controller
 
+A conversão de dados é uma necessidade cada vez mais comum, principalmente quando buscamos entregar para o usuário mais facilidades. Pensando nisso, o Spring MVC também nos traz recursos que simplificam esse trabalho. Saiba, neste vídeo, como converter uma data, enviada por um formulário no formato texto, em um objeto Java que representa um tipo data (Date, Calendar ou LocalDate), e também, veja como formatar uma data para ser exibida na página web.
 
+**Conteúdo de apoio**
 
+Para converter uma data enviada por um formulário em um tipo Date, Calendar ou LocalDate, o Spring MVC possui um conversor padrão, baseado na anotação @DateTimeFormat.
 
+Para fazer uso desse recurso, basta adicionar a anotação na classe de domínio, junto ao atributo do tipo data que se deseja converter.
 
+Para confirmar como é simples fazer essa conversão, observe o código necessário a seguir:
 
+```java
+@DateTimeFormat
+private LocalDate dtNascimento;
+```
 
+# 15. Conversão de enum entre view e controller
 
+O Spring MVC nos fornece mais de uma opção para conversão de dados. Neste vídeo você saberá como converter um valor do tipo texto, enviado a partir do formulário, em um objeto Java do tipo enum, utilizando os recursos do framework para automatizar essa mudança no tipo de dados.
 
+**Conteúdo de apoio**
 
+Para converter um valor enviado por um formulário em um objeto Java complexo, que deve ser recebido em um controller, o processo é um pouco mais complexo do que o visto na aula anterior. É necessário habilitar a conversão na configuração do Spring MVC. Para isso, podemos implementar o método addFormatters(), como exposto abaixo:
+
+```java
+@Override
+public void addFormatters(FormatterRegistry registry) {
+   registry.addConverter(new TipoSexoConverter());
+}
+```
+
+Esse método é herdado e sobrescrito da classe WebMvcConfigurerAdapter. O argumento registry fornece acesso ao método addConverter(), no qual se deve adicionar como parâmetro a instância da classe que contém o conversor de tipos. Esse conversor deve implementar a classe Converter, do pacote org.springframework.core.convert.converter.
+
+# 16. Validação com Bean Validation
+
+A validação de dados é um passo importante para a segurança e correto funcionamento da aplicação. Com o Spring MVC esse processo é facilitado devido ao suporte à Bean Validation. Aqui, será demonstrado como realizar a validação, no back-end, de dados enviados a partir de um formulário e também, como exibir as mensagens de validação na página.
+
+**Conteúdo de apoio**
+
+O sistema de validação de formulários pelo lado servidor, em aplicações com Spring MVC, pode ser realizado com Bean Validation. Para isso, primeiro é necessário adicionar uma biblioteca que implementa a Bean Validation, como o Hibernate-Validator. Um exemplo, usando o gerenciador de dependências Maven, pode ser visualizado a seguir:
+
+```xml
+<dependency>
+   <groupId>org.hibernate</groupId>
+   <artifactId>hibernate-validator</artifactId>
+   <version>5.3.2.Final</version>
+</dependency>
+```
+
+Dessa forma, você terá acesso, nas classe de domínio, às anotações de validação - tanto aquelas que seguem a especificação Bean Validation, quanto as da implementação Hibernate-Validator.
+
+# 17. Mensagens de validação via arquivos
+
+Para reduzir o acoplamento entre seu código e as mensagens de validação, é recomendado, muitas vezes, separar as mensagens de validação em um arquivo de propriedades. Este vídeo ensinará como fazer essa mudança.
+
+**Conteúdo de apoio**
+
+Mensagens de validação podem ser adicionadas nas próprias anotações ou então, de forma considerada mais profissional, em um arquivo de propriedades. Desse modo, se tem uma maior facilidade para atualização ou mesmo internacionalização das mensagens.
+
+No Spring MVC, para carregar as mensagens de um arquivo de propriedades, é necessário criar um bean que diga ao Spring que ele deve carregar o arquivo, e este, por sua vez, deve estar no diretório “resources” no classpath da aplicação.
+
+O bean apresentado a seguir é um exemplo. Em seu código, o método setBasename() recebe como valor o nome do arquivo de propriedades, sem a extensão “.properties”.
+
+@Bean
+public MessageSource messageSource() {
+   ResourceBundleMessageSource source = new ResourceBundleMessageSource();
+   source.setBasename("messages");
+   return source;
+}
+
+# 18. Incluindo o Bootstrap
+
+Aprenda como adicionar arquivos estáticos em aplicações que utilizam o Spring MVC. Como exemplo, vamos usar o framework Bootstrap e seu arquivo “bootstrap.css” para apresentar a técnica que deve ser adotada nestas situações.
+
+**Conteúdo de apoio**
+
+Em aplicações web é muito comum trabalhar com arquivos estáticos no front-end. CSS, JS e JPEG são exemplos de arquivos considerados estáticos. Para fazer uso desses arquivos no Spring MVC é preciso habilitar essa funcionalidade a partir de um método herdado da classe WebMvcConfigurerAdapter, como exposto a seguir:
+
+```java
+@Override
+public void addResourceHandlers(ResourceHandlerRegistry registry) {
+   registry.addResourceHandler("/static/**").addResourceLocations("/WEB-INF/resources/");
+}
+```
+
+O método addResourceHandlers() deve ser sobrescrito com informações sobre o local onde os arquivos estáticos se encontram;
+
+**Linha 03**: O método addResourceHandler() recebe uma instrução que vai trabalhar como um atalho dentro da página JSP para alcançar o arquivo que deve ser carregado;
+
+**Linha 04**: O método addResourceLocations() deve receber como parâmetro o local raiz de onde os arquivos estáticos estão localizados. Normalmente esse local é o diretório WEB-INF/resources.
 
 
 
